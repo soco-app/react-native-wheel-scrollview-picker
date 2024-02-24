@@ -43,15 +43,8 @@ export type ScrollPickerProps<ItemT extends string | number> = {
   style?: ViewProps["style"];
   dataSource: Array<ItemT>;
   selectedIndex?: number;
-  onValueChange?: (
-    value: ItemT,
-    index: number
-  ) => void;
-  renderItem?: (
-    data: ItemT,
-    index: number,
-    isSelected: boolean
-  ) => JSX.Element;
+  onValueChange?: (value: ItemT, index: number) => void;
+  renderItem?: (data: ItemT, index: number, isSelected: boolean) => JSX.Element;
   highlightColor?: string;
   highlightBorderWidth?: number;
   itemTextStyle?: object;
@@ -63,14 +56,27 @@ export type ScrollPickerProps<ItemT extends string | number> = {
   // tried using ComponentType<ScrollViewProps & { ref: React.RefObject<ScrollView> }>
   // but ScrollView component from react-native-gesture=handler is not compatible with this.
   scrollViewComponent?: any;
+  highlightStyleProps?: ViewStyle;
+  wrapperStyleProps?: ViewStyle;
 };
 
 export type ScrollPickerHandle = {
   scrollToTargetIndex: (val: number) => void;
-}
+};
 
-const ScrollPicker: { <ItemT extends string | number>(props: ScrollPickerProps<ItemT> & { ref?: Ref<ScrollPickerHandle> }): ReactNode } = React.forwardRef((propsState, ref) => {
-  const { itemHeight = 30, style, scrollViewComponent, ...props } = propsState;
+const ScrollPicker: {
+  <ItemT extends string | number>(
+    props: ScrollPickerProps<ItemT> & { ref?: Ref<ScrollPickerHandle> }
+  ): ReactNode;
+} = React.forwardRef((propsState, ref) => {
+  const {
+    itemHeight = 30,
+    style,
+    scrollViewComponent,
+    highlightStyleProps,
+    wrapperStyleProps,
+    ...props
+  } = propsState;
   const [initialized, setInitialized] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(
     props.selectedIndex && props.selectedIndex >= 0 ? props.selectedIndex : 0
@@ -119,10 +125,7 @@ const ScrollPicker: { <ItemT extends string | number>(props: ScrollPickerProps<I
     return { header, footer };
   };
 
-  const renderItem = (
-    data: typeof props.dataSource[0],
-    index: number
-  ) => {
+  const renderItem = (data: (typeof props.dataSource)[0], index: number) => {
     const isSelected = index === selectedIndex;
     const item = props.renderItem ? (
       props.renderItem(data, index, isSelected)
@@ -225,6 +228,7 @@ const ScrollPicker: { <ItemT extends string | number>(props: ScrollPickerProps<I
     flex: 1,
     backgroundColor: props.wrapperBackground || "#fafafa",
     overflow: "hidden",
+    ...wrapperStyleProps,
   };
 
   const highlightStyle: ViewStyle = {
@@ -236,6 +240,7 @@ const ScrollPicker: { <ItemT extends string | number>(props: ScrollPickerProps<I
     borderBottomColor: highlightColor,
     borderTopWidth: highlightBorderWidth,
     borderBottomWidth: highlightBorderWidth,
+    ...highlightStyleProps,
   };
 
   const CustomScrollViewComponent = scrollViewComponent || ScrollView;
